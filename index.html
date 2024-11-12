@@ -13,11 +13,12 @@
             min-height: 100vh;
             margin: 0;
             background-color: #f8f9fa;
+            padding: 10px;
         }
 
         .container {
-            width: 80%;
-            max-width: 800px;
+            width: 100%;
+            max-width: 600px;
             background-color: #ffffff;
             padding: 20px;
             border-radius: 8px;
@@ -27,26 +28,35 @@
         h1 {
             text-align: center;
             color: #333333;
+            font-size: 24px;
+            margin-bottom: 20px;
         }
 
         .form-container {
             display: flex;
-            gap: 10px;
+            gap: 15px;
+            flex-wrap: wrap;
             margin-bottom: 20px;
         }
 
         .form-container input {
-            padding: 10px;
+            padding: 12px;
             flex: 1;
+            min-width: 150px;
+            margin-bottom: 10px; /* Menambahkan jarak antar input */
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
 
         button {
-            padding: 10px;
+            padding: 12px;
             background-color: #007bff;
             color: #ffffff;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            min-width: 120px;
+            margin-top: 10px; /* Menambahkan jarak antar tombol */
         }
 
         button:hover {
@@ -57,6 +67,8 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
+            display: block;
+            overflow-x: auto;
         }
 
         table, th, td {
@@ -64,7 +76,7 @@
         }
 
         th, td {
-            padding: 10px;
+            padding: 12px;
             text-align: center;
         }
 
@@ -79,17 +91,42 @@
 
         .sort-filter-container {
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
             margin-bottom: 20px;
         }
 
         .toggle-btn {
             background-color: #28a745;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px; /* Menambahkan jarak antar tombol toggle */
         }
 
         .toggle-btn:hover {
             background-color: #218838;
         }
+
+        /* Mobile responsiveness */
+        @media screen and (max-width: 600px) {
+            .form-container {
+                flex-direction: column;
+            }
+
+            .sort-filter-container {
+                flex-direction: column;
+            }
+
+            .toggle-btn {
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            .form-container input, button {
+                margin-bottom: 15px; /* Menambahkan jarak antar form dan tombol di mobile */
+            }
+        }
+
     </style>
 </head>
 <body>
