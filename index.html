@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Pengelola Catering</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 800px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333333;
+        }
+
+        .form-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-container input {
+            padding: 10px;
+            flex: 1;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .actions button {
+            margin: 0 5px;
+        }
+
+        .sort-filter-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .toggle-btn {
+            background-color: #28a745;
+        }
+
+        .toggle-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Pengelola Catering</h1>
+
+        <!-- Sort and Filter Controls -->
+        <div class="sort-filter-container">
+            <div>
+                <label for="sortBy">Urutkan Berdasarkan:</label>
+                <select id="sortBy" onchange="sortOrders()">
+                    <option value="name">Nama Pelanggan</option>
+                    <option value="quantity">Jumlah Pesanan</option>
+                </select>
+            </div>
+            <div>
+                <label for="filterBy">Filter Menu:</label>
+                <input type="text" id="filterBy" oninput="filterOrders()" placeholder="Filter berdasarkan menu">
+            </div>
+        </div>
+
+        <!-- Toggle Button for Showing/Hide Orders -->
+        <button class="toggle-btn" onclick="toggleOrders()">Tampilkan/Sembunyikan Daftar Pesanan</button>
+
+        <!-- Form untuk menambahkan pesanan baru -->
+        <div class="form-container">
+            <input type="text" id="customerName" placeholder="Nama Pelanggan">
+            <input type="text" id="menuItem" placeholder="Nama Menu">
+            <input type="number" id="quantity" placeholder="Jumlah">
+            <button onclick="addOrder()">Tambah Pesanan</button>
+        </div>
+
+        <!-- Daftar pesanan -->
+        <div class="order-list">
+            <h2>Daftar Pesanan</h2>
+            <table id="orderTable">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Pelanggan</th>
+                        <th>Menu</th>
+                        <th>Jumlah</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data pesanan akan ditambahkan di sini oleh JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let orders = JSON.parse(localStorage.getItem('orders')) || [];
+        let ordersVisible = true; // Variabel untuk menyimpan status tampilan daftar pesanan
+
+        // Add order to the list
+        function addOrder() {
+            const customerName = document.getElementById("customerName").value;
+            const menuItem = document.getElementById("menuItem").value;
+            const quantity = document.getElementById("quantity").value;
+
+            if (!customerName || !menuItem || !quantity) {
+                alert("Isi semua kolom!");
+                return;
+            }
+
+            orders.push({
+                customerName,
+                menuItem,
+                quantity: parseInt(quantity)
+            });
+            saveOrders();
+            renderOrders();
+            clearForm();
+        }
+
+        // Render orders into the table
+        function renderOrders() {
+            const orderTableBody = document.getElementById("orderTable").querySelector("tbody");
+            orderTableBody.innerHTML = "";
+
+            orders.forEach((order, index) => {
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${order.customerName}</td>
+                    <td>${order.menuItem}</td>
+                    <td>${order.quantity}</td>
+                    <td class="actions">
+                        <button onclick="editOrder(${index})">Edit</button>
+                        <button onclick="deleteOrder(${index})">Hapus</button>
+                    </td>
+                `;
+                orderTableBody.appendChild(row);
+            });
+        }
+
+        // Delete an order from the list
+        function deleteOrder(index) {
+            orders.splice(index, 1);
+            saveOrders();
+            renderOrders();
+        }
+
+        // Edit an existing order
+        function editOrder(index) {
+            const order = orders[index];
+            document.getElementById("customerName").value = order.customerName;
+            document.getElementById("menuItem").value = order.menuItem;
+            document.getElementById("quantity").value = order.quantity;
+
+            // Remove the order first to avoid duplicates
+            deleteOrder(index);
+        }
+
+        // Sort orders by selected criteria
+        function sortOrders() {
+            const sortBy = document.getElementById("sortBy").value;
+            if (sortBy === "name") {
+                orders.sort((a, b) => a.customerName.localeCompare(b.customerName));
+            } else {
+                orders.sort((a, b) => a.quantity - b.quantity);
+            }
+            renderOrders();
+        }
+
+        // Filter orders by menu item
+        function filterOrders() {
+            const filterBy = document.getElementById("filterBy").value.toLowerCase();
+            const filteredOrders = orders.filter(order => order.menuItem.toLowerCase().includes(filterBy));
+            renderFilteredOrders(filteredOrders);
+        }
+
+        // Render filtered orders
+        function renderFilteredOrders(filteredOrders) {
+            const orderTableBody = document.getElementById("orderTable").querySelector("tbody");
+            orderTableBody.innerHTML = "";
+
+            filteredOrders.forEach((order, index) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${order.customerName}</td>
+                    <td>${order.menuItem}</td>
+                    <td>${order.quantity}</td>
+                    <td class="actions">
+                        <button onclick="editOrder(${index})">Edit</button>
+                        <button onclick="deleteOrder(${index})">Hapus</button>
+                    </td>
+                `;
+                orderTableBody.appendChild(row);
+            });
+        }
+
+        // Save orders to local storage
+        function saveOrders() {
+            localStorage.setItem('orders', JSON.stringify(orders));
+        }
+
+        // Clear the form inputs
+        function clearForm() {
+            document.getElementById("customerName").value = "";
+            document.getElementById("menuItem").value = "";
+            document.getElementById("quantity").value = "";
+        }
+
+        // Toggle the visibility of the orders table
+        function toggleOrders() {
+            const orderTable = document.getElementById("orderTable");
+            ordersVisible = !ordersVisible;
+            if (ordersVisible) {
+                orderTable.style.display = "table";
+            } else {
+                orderTable.style.display = "none";
+            }
+        }
+
+        // Initial render of orders
+        renderOrders();
+    </script>
+
+</body>
+</html>
